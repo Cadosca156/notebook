@@ -1,4 +1,5 @@
-import {useState} from "react";
+import {useRef, useState} from "react";
+import {eventWrapper} from "@testing-library/user-event/dist/utils";
 
 
 export default function Notebook() {
@@ -6,9 +7,11 @@ export default function Notebook() {
     const [notes, setNotes] = useState([]);
     const [formOpen, setFormOpen] = useState(false);
 
-    let id;
-    let completed = new Boolean();
 
+    function Form() {
+        const inputRef = useRef();
+
+    }
     // TODO: implement the functions below
     // TODO add styles to this page
     function openForm() {
@@ -16,7 +19,7 @@ export default function Notebook() {
     }
     function addNote(text) {
        const newNote = {
-           id: id = crypto.randomUUID(),
+           id: crypto.randomUUID(),
            text: text,
            completed: false
        };
@@ -40,9 +43,9 @@ export default function Notebook() {
     }
 
     return (
-        <div style={{backgroundColor: "white"}}>
-            <h1>Todo List</h1>
-            <button onClick={openForm}>Add Note</button>
+        <div className={"wrapper"} >
+            <h1 style={{fontSize:"500%"}}>Todo List</h1>
+            <button className={"add-button"} onClick={openForm}>Add Note</button>
             {formOpen ? (
                 <form
                     onSubmit={(e) => {
@@ -52,21 +55,22 @@ export default function Notebook() {
                         setFormOpen(false);
                     }}
                 >
-                    <label>Note:</label>
-                    <input type="text" name="noteText" required />
-                    <button type="submit">Add</button>
+                    <label style={{fontSize:"200%",fontWeight:"bold"}}>Note:</label>
+                    <input className={"note_input"} type="text" name="noteText" required />
+                    <button className={"sub_del-button"}  type="submit">Submit</button>
                 </form>
             ) : null}
             <ul>
                 {notes.map((note) => (
                     <li key={note.id}>
-                        <input
+                        <input style={{transform:"scale(2)",width:"10%"}}
                             type="checkbox"
                             checked={note.completed}
                             onChange={() => toggleCompleted(note.id)}
-                        />
+                        /><span style={{fontSize:"200%",}}>
                         {note.text}
-                        <button onClick={() => deleteNote(note.id)}>Delete</button>
+                    </span>
+                        <button className={"sub_del-button"} onClick={() => deleteNote(note.id)}>Delete</button>
                     </li>
                 ))}
             </ul>

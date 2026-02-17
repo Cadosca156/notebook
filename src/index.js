@@ -2,6 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import Notebook from "./notebook";
+import './styles.css'
+import './buttons.css'
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

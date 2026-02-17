@@ -1,0 +1,21 @@
+.sub_del-button{
+    background-color:black;
+    width:30%;
+    height:3vh;
+    font-weight:bold;
+    font-size:120%;
+    border-style:solid;
+    border-color:white;
+    border-radius:5px;
+    color:white;
+}
+.add-button
+{
+    background-color:black;
+    border-style:solid ;
+    border-color:white;
+    border-radius:5px;
+    color:white;
+    font-size:250%;
+    font-weight:bold
+}
