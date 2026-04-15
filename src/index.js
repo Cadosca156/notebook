@@ -1,19 +1,17 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import Notebook from "./notebook";
-import './styles.css'
-import './buttons.css'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./components/App";
+import { AuthProvider } from "./context/AuthContext";
+import {Toaster} from "react-hot-toast";
 
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
-    <Notebook />
-  </React.StrictMode>
+
+    <AuthProvider>
+        <div><Toaster/></div>
+        <App />
+    </AuthProvider>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 

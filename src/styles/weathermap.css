@@ -1,0 +1,48 @@
+.weathermap{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.map{
+    width: 100vh;
+    height: 70vh;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 20px;
+    margin-top: 100px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.about{
+    display: flex;
+    position: relative;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 1.2vw;
+
+
+
+}
+
+
+
+
+.weather-card {
+    position: absolute;
+
+    left: 50%;
+    transform: translateX(-50%);
+
+    font-weight: bold;
+    width: 350px;
+    min-height: 120px;
+
+    padding: 15px 20px;
+    border-radius: 16px;
+
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+
+    color: white;
+}
