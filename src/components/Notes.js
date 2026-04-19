@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import { loadNotes, saveNotes } from "../utils/cookieStorage";
 import { useAuth } from "../context/AuthContext";
-import '../styles/notesBackground.css';
+
 import '../styles/notesButtons.css';
 import '../styles/notes.css';
 import '../styles/reminder.css';

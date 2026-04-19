@@ -2,7 +2,7 @@ import {useAuth} from "../context/AuthContext";
 import '../styles/navbar.css';
 import {useState} from "react";
 import {NavLink} from "react-router-dom";
-import WeatherMap from "./WeatherMap";
+
 
 export default function Navbar() {
     const {user, logout} = useAuth();
@@ -13,8 +13,15 @@ export default function Navbar() {
                className={`navbar ${isHovered ? "active" : ""}`}>
 
             <h1
-                className={`welcome ${isHovered ? "active" : ""}`}>Welcome, {user.username}!</h1>
+                className={`welcome ${isHovered ? "active" : ""}`}>Notebook</h1>
                 <div className="link-container">
+
+
+                    <NavLink to="/" className={({ isActive }) =>
+                        isActive ? "nav-link active" : "nav-link"
+                    }><button className={"link-button"}>
+                        Notes
+                    </button> </NavLink>
 
                 <NavLink to="./weather"  className={({ isActive }) =>
                     isActive ? "nav-link active" : "nav-link"
@@ -25,11 +32,7 @@ export default function Navbar() {
 
 
 
-                <NavLink to="/" className={({ isActive }) =>
-                    isActive ? "nav-link active" : "nav-link"
-                }><button className={"link-button"}>
-                    Notes
-                    </button> </NavLink>
+
 
                 </div>
             <button onClick={logout} className={`logout-button ${isHovered ? "active" : ""}`}>

@@ -1,62 +1,86 @@
-import mapboxgl from "mapbox-gl";
-import { useEffect, useRef, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import { useState } from "react";
+import axios from "axios";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import "../styles/weathermap.css"
 
+import iconUrl from "leaflet/dist/images/marker-icon.png";
+import iconShadow from "leaflet/dist/images/marker-shadow.png";
+
+let DefaultIcon = L.icon({
+    iconUrl,
+    shadowUrl: iconShadow,
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
+
+function WeatherMarker({ setWeather }) {
+    useMapEvents({
+        click: async (e) => {
+            const { lat, lng } = e.latlng;
+
+            try {
+                const res = await axios.get(
+                    `https://api.openweathermap.org/data/2.5/weather`,
+                    {
+                        params: {
+                            lat,
+                            lon: lng,
+                            appid: "9303c3f8b021c935ec609abcef3fa97d",
+                            units: "metric",
+                        },
+                    }
+                );
+
+                setWeather({
+                    position: [lat, lng],
+                    data: res.data,
+                });
+            } catch (err) {
+                console.error("Weather error:", err);
+            }
+        },
+    });
+
+    return null;
+}
+
 export default function WeatherMap() {
-    const mapRef = useRef(null);
     const [weather, setWeather] = useState(null);
 
-    const getWeather = async (lat, lon) => {
-        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${process.env.REACT_APP_WEATHER_KEY}&units=metric&current`;
-
-        const res = await fetch(url);
-        const data = await res.json();
-
-        setWeather(data);
-    };
-
-    useEffect(() => {
-        mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
-
-        const map = new mapboxgl.Map({
-            container: mapRef.current,
-            style: "mapbox://styles/cardo07k/cmnzz4pj0006z01s9155z4jwi",
-            center: [30.5238, 50.4547],
-            zoom: 5,
-        });
-
-        map.on("click", (e) => {
-            const lat = e.lngLat.lat;
-            const lon = e.lngLat.lng;
-
-            console.log("Coords:", lat, lon);
-            getWeather(lat, lon);
-        });
-
-        return () => map.remove();
-    }, []);
-
-
     return (
-        <div className="weathermap">
-            <div className="about">
-                {weather?.main && (
-                    <div className="weather-card">
-                        <h2>{weather.name}</h2>
+        <div style={{ height: "100vh", width: "100%" }}>
+            <MapContainer
+                center={[49.8, 30.1]}
+                zoom={7}
+                className={"map-container"}
+            >
+                <TileLayer
+                    attribution='&copy; OpenStreetMap contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
 
-                        <p>🌡 {weather.main.temp}°C</p>
-                        <p>🤔 Feels Like: {weather.main.feels_like}°C</p>
-                        <p>💧 Humidity: {weather.main.humidity}%</p>
-                        <p>💨 Wind: {weather.wind.speed} м/с</p>
-                        <p>☁️ {weather.weather[0].description}</p>
-                    </div>
+                <WeatherMarker setWeather={setWeather} />
+
+                {weather && (
+                    <Marker position={weather.position}>
+                        <Popup>
+                            <div className="weather-popup">
+                                <h3 className={"weather-header"}>{weather.data.name}</h3>
+                                <p>
+                                     Temp: {weather.data.main.temp}°C
+                                    <br />
+                                     Weather: {weather.data.weather[0].description}
+                                    <br />
+                                     Wind: {weather.data.wind.speed} m/s
+                                </p>
+                            </div>
+                        </Popup>
+                    </Marker>
                 )}
-            </div>
-            <div className={"map-wrapper"}>
-            <div ref={mapRef}  className="map">
-            </div>
-            </div>
-
+            </MapContainer>
         </div>
     );
 }
+
