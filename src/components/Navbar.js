@@ -5,7 +5,7 @@ import {NavLink} from "react-router-dom";
 
 
 export default function Navbar() {
-    const {user, logout} = useAuth();
+    const { logout} = useAuth();
     const [isHovered, setIsHovered] = useState(false);
     return (
         <div   onMouseEnter={() => setIsHovered(true)}
