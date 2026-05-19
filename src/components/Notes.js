@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
-import { loadNotes, saveNotes } from "../utils/cookieStorage";
-import { useAuth } from "../context/AuthContext";
+import {loadNotes, saveNotes} from "../utils/cookieStorage";
+import {useAuth} from "../context/AuthContext";
+import {fetchNotes, postNote, deleteNote, updateNote} from "../utils/NotesBDStorage";
 
 import '../styles/notesButtons.css';
 import '../styles/notes.css';
@@ -9,64 +10,60 @@ import toast from 'react-hot-toast';
 
 
 export default function Notes() {
-    const { user } = useAuth();
-    const [deadline, setDeadline] = useState("");
+    const {user} = useAuth();
+    const [date, setDate] = useState("");
     const [notes, setNotes] = useState(() => loadNotes(user.username));
     const [text, setText] = useState("");
     const [formOpen, setFormOpen] = useState(false);
     const [reminderNote, setReminderNote] = useState(null);
+    const [completed, setCompleted] = useState(false);
+    const [noteData, setNoteData] = useState({
+        text: "",
+        date: "",
+        completed: false
+    });
+    useEffect(() => {
+        const loadNotes = async () => {
+            try {
+                const data = await fetchNotes();
+                setNotes(data);
+            } catch (error) {
+                console.log(error);
+            }
+        };
 
-    const subNotify = () => toast.success('Note added successfully ');
-    const delNotify = () => toast.success('Deleted successfully');
+        loadNotes();
+    }, []);
+
+
+    const handleSubmit = async () => {
+        await postNote(text, completed, date)
+        setNotes(prev => [...prev, notes]);
+    }
+
+    const handleDelete = async (id) => {
+        await deleteNote(id)
+        setNotes(notes.filter((note) => note.id !== id))
+    }
+
+    const handleUpdate = async (noteid) => {
+        await updateNote( completed)
+        setNotes(prev =>
+            prev.map(note =>
+                note.id === noteid
+                    ? { ...note, completed: !note.completed }
+                    : note
+            )
+        );
+    }
+
     function openForm() {
         setFormOpen(true);
     }
 
-    useEffect(() => {
-        if (Notification.permission !== "granted") {
-            Notification.requestPermission();
-        }
-    }, []);
 
-    function addNote() {
-        if (!text.trim())
-
-            return;
-
-        const newNote = {
-            id: crypto.randomUUID(),
-            text,
-            completed: false,
-            deadline: deadline || null,
-        };
-        scheduleReminder(newNote);
-        const updated = [...notes, newNote];
-
-        setNotes(updated);
-        saveNotes(user.username, updated);
-
-        setText("");
-        setFormOpen(false);
-    }
-
-    function deleteNote(id) {
-        const updated = notes.filter(n => n.id !== id);
-        setNotes(updated);
-        saveNotes(user.username, updated);
-    }
-
-
-    function toggleCompleted(id) {
-        const updated = notes.map(n =>
-            n.id === id ? { ...n, completed: !n.completed } : n
-        );
-        setNotes(updated);
-        saveNotes(user.username, updated);
-    }
     function formatDate(dateString) {
         const date = new Date(dateString);
-
-
 
         return date.toLocaleString("uk-UA", {
             day: "2-digit",
@@ -98,6 +95,7 @@ export default function Notes() {
             }
         }, delay);
     }
+
     function getNoteStatus(deadline) {
         if (!deadline) return "normal";
 
@@ -109,6 +107,7 @@ export default function Notes() {
         if (now >= deadlineTime && now <= deadlineTime + TEN_MIN) return "warning";
         return "overdue";
     }
+
     const [, forceUpdate] = useState(0);
 
     useEffect(() => {
@@ -118,12 +117,6 @@ export default function Notes() {
 
         return () => clearInterval(interval);
     }, []);
-
-
-
-
-
-
 
 
     const sortedNotes = [...notes].sort((a, b) => {
@@ -144,22 +137,21 @@ export default function Notes() {
     return (
         <div className="wrapper">
 
-            <div className={"header"} style={{pointerEvents:""}}>Todo List</div>
+            <div className={"header"} style={{pointerEvents: ""}}>Todo List</div>
 
             <button className="add-button" onClick={openForm}>
                 Add Note
             </button>
 
-                <div className={"add-note"}>
-                    <form
+            <div className={"add-note"}>
+                <form
 
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            addNote(notes);
-                            subNotify();
-                        }}
-                        className={`note-form ${formOpen ? "active" : ""}`}
-                    >
+                    onSubmit={(e) => {
+                        e.preventDefault();
+
+                    }}
+                    className={`note-form ${formOpen ? "active" : ""}`}
+                >
                     <label className={"note-label"}>
                         Note:
                     </label>
@@ -174,18 +166,20 @@ export default function Notes() {
                     <input
                         className="note_input"
                         type="datetime-local"
-                        value={deadline}
-                        onChange={(e) => setDeadline(e.target.value)}
+                        value={date}
+                        onChange={(e) => setDate(e.target.value)}
                     />
 
-                    <button className="sub-button" type="submit">
+                    <button className="sub-button" type="submit" onClick={(e) => {
+                        handleSubmit()
+                    }}>
                         Submit
                     </button>
-                        <button type="reset" className="cancel-button"  onClick={() =>setFormOpen(false)}>
+                    <button type="reset" className="cancel-button" onClick={() => setFormOpen(false)}>
                         Cancel
-                        </button>
+                    </button>
                 </form>
-                </div>
+            </div>
 
             <ul className={"note"}>
                 {sortedNotes.map((note) => (
@@ -200,32 +194,27 @@ export default function Notes() {
                                         : "note-normal"
                         }`}>
                         <input
-                            style={{ transform: "scale(1.5)"}}
+                            style={{transform: "scale(1.5)"}}
                             type="checkbox"
                             checked={note.completed}
-                            onChange={() => {
-                                const isNowCompleted = !note.completed;
+                            onChange={(e) => {
+                                setCompleted(!note.completed);
+                                handleUpdate(note.id);
 
-                                toggleCompleted(note.id);
 
-                                if (isNowCompleted) {
-                                    toast.success(note.text);
-                                }
                             }}
                         />
                         <div className={"note-text"}>
-                        <span style={{fontSize: "200%"}}>{note.text}</span>
-                        {note.deadline && (
-                            <div style={{ fontSize: "150%", color: "orange" }}>
-                                 До: {formatDate(note.deadline)}
-                            </div>
+                            <span style={{fontSize: "200%"}}>{note.text}</span>
+                            <span style={{fontSize: "200%"}}>{formatDate(note.date)}</span>
 
-                        )}
                         </div>
                         <button
                             className="del-button"
-                            onClick={() => {deleteNote(note.id)
-                                delNotify()}}
+
+                            onClick={() => {
+                                handleDelete(note.id)
+                            }}
                         >
                             Delete
                         </button>
